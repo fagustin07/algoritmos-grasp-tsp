@@ -15,14 +15,15 @@ def tsp(ciudades, distancia, ciudad_origen):
     solucion = (recorrido.copy(), costo)
     mejor_recorrido, mejor_costo = busqueda_local(solucion, distancias_completas)
 
-    print("solucion heurística:")
+    print("solución heurística:")
     print(recorrido)
     print(costo)
-    print("solucion búsqueda local:")
+    print()
+    print("solución búsqueda local:")
     print(mejor_recorrido)
     print(mejor_costo)
-    # comento el return porque se deforma al correr el codigo en este formato 
-    # return mejor_solucion_encontrada
+
+    return (mejor_recorrido, mejor_costo)
 
 # propósito: encontrar un camino con un costo relativamente bajo que pase 
 # por todas las ciudades.
