@@ -83,7 +83,7 @@ def buscar_vecino(solucion, distancia):
 
             diferencia_costo = costo_y - costo_x
 
-            if diferencia_costo < mejor_cambio_local:
+            if diferencia_costo < 0 and diferencia_costo < mejor_cambio_local:
                 mejor_cambio_local = diferencia_costo
                 mejor_i = i
                 mejor_j = j
