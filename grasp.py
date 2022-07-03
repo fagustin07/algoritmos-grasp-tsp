@@ -14,22 +14,40 @@ import numpy as np
 # menciono que para mí la complejidad de BL es más bien O(N^2) y que el while
 # representa un k fijo y no hace que la complejidad llegue a O(N^3) sino
 # más bien O(k * N^2) siendo k < N.
-def grasp(ciudades, distancia, ciudad_origen):
+def exec(ciudades, distancia, ciudad_origen):
+    N = len(ciudades)
     dicc_ciudades = {ciudad: False for ciudad in ciudades}
     # distancias_completas = floyd_warshall(ciudades, distancia.copy())
     distancias_completas = distancia
+    # limite_iteraciones = calcular_tolerancia(len(ciudades))
+    max_iteraciones = limite_grasp(N)
+    max_it_bl = limite_bl(N)
+    resultados = []
+    res_iteracion = []
+    if (N < 2):
+        resultados.append([(ciudades, 0)])
+        return resultados
 
-    recorrido, costo = heuristica_nearest_neighbor(dicc_ciudades.copy(), distancias_completas, ciudad_origen)
-    solucion_heuristica = (recorrido.copy(), costo)
-    sol_local = busqueda_local(solucion_heuristica, distancias_completas)
+    mejor_resultado = ([], math.inf)
+    while max_iteraciones > 0:
+        # solución greedy
+        recorrido, costo = heuristica_nearest_neighbor(dicc_ciudades.copy(), distancias_completas, ciudad_origen)
+        sol_greedy = (recorrido.copy(), costo)
+        print(f"\n[#{max_iteraciones}] puntaje greedy: {costo}")
+        res_iteracion.append(sol_greedy)
+        # solución búsqueda local
+        sol_local = busqueda_local(sol_greedy, distancias_completas, res_iteracion, max_it_bl)
+        print(f"[#{max_iteraciones}] puntaje búsqueda local: {sol_local[1]}")
+        if sol_local[1] < mejor_resultado[1]:
+          mejor_resultado = sol_local
+        resultados.append(res_iteracion)
+        print(f"[#{max_iteraciones}] iteraciones en búsqueda local: {len(res_iteracion)-1}")
+        res_iteracion = []
+        max_iteraciones -= 1
+        
+    print(f"\nmejor resultado encontrado para {len(ciudades)} ciudades: {mejor_resultado[1]}")
 
-    print("solución heurística:")
-    print(costo)
-    print()
-    print("solución búsqueda local:")
-    print(sol_local[1])
-
-    return sol_local[1]
+    return resultados
 
 # propósito: encontrar un camino con un costo relativamente bajo que pase 
 # por todas las ciudades.
@@ -64,26 +82,24 @@ def heuristica_nearest_neighbor(ciudades, distancia, ciudad_inicial):
 # por N en el caso que siempre encuentre un vecino con costos mejorados mayores al 10% del anterior.
 # Esto en la teoría, pero la verdad es que al optimizar la BL siento que el costo 
 # es mas bien O(k * N^2) => O(N^2).
-def busqueda_local(solucion, distancia):
-    print("comienza busqueda local:")
+def busqueda_local(solucion, distancia, res_iteraciones, limite_corte):
     mejor_recorrido = solucion[0]
     mejor_costo = solucion[1]
     sigo_buscando = True
-    limite_tolerancia = calcular_tolerancia(len(mejor_recorrido))
 
-    while sigo_buscando and limite_tolerancia > 0:
+    while sigo_buscando and limite_corte > 0:
         recorrido_vecino, costo_vecino, mejora_vecino = buscar_vecino((mejor_recorrido.copy(), mejor_costo), distancia)
 
         if costo_vecino < mejor_costo:
-            mejora_minima_apreciable = mejor_costo * 0.03
-            print("costo actual: {}, costo vecino: {}, mejora minima apreciable: {}, mejora: {}".format(mejor_costo, costo_vecino, mejora_minima_apreciable, mejora_vecino))
+            mejora_minima_apreciable = mejor_costo * 0.1
             if mejora_vecino < mejora_minima_apreciable:
-                limite_tolerancia -= 1
+                limite_corte -= 1
             mejor_recorrido = recorrido_vecino
             mejor_costo = costo_vecino
         else:
             sigo_buscando = mejora_vecino != 0
 
+        res_iteraciones.append((mejor_recorrido, mejor_costo))
     return (mejor_recorrido, mejor_costo)
 
 # propósito: explora el vecindario de una solución actual y retorna
@@ -134,7 +150,7 @@ def floyd_warshall(V, E):
 # propósito: retorna un entero que limitará los posibles n destinos que tiene una ciudad.
 # complejidad: O(1) ya que son cálculos.
 def cantidad_mejores(n):
-    top_N = math.ceil( n * 0.05)
+    top_N = int(np.ceil(n * 0.05))
 
     if top_N >= 3:
         return top_N
@@ -145,30 +161,15 @@ def cantidad_mejores(n):
     else:
         1
 
-# propósito: retorna un entero que limitará la poca mejora al explorar vecindarios/
+# propósito: retorna un entero que limitará la cantidad de iteraciones de grasp.
 # complejidad: O(1) ya que son cálculos.
-# comentario: llegué a este número luego de probar varias combinaciones de 
-# corte mencionadas en clase. Ejecutando el algoritmo varias 
-# veces con diferentes cantidades de instancias(20, 50, 100 y 200), saqué el 
-# minimo apreciable, que podría ser mayor pero no lo vi necesario para 
-# las pruebas que realicé ya que les cuesta llegar a vecinos apreciables con
-# la cantidad que fijé (3%).
-def calcular_tolerancia(n):
+# comentario: tomé esta condición que fue mencionada en clase y basándome en las 
+# pruebas que hice con 100 iteraciones de grasp, me parece un numero correcto.
+def limite_grasp(n):
     return int(np.ceil(np.log2(n)))
 
-# Encontré por internet esta forma de crear la matriz de distancias.
-# No sé si servirá pero me ayuda a empezar a ver resultados.
-N = 1000
-ciudades = [i for i in range(N)]
-aristas = [(i,j) for i in range(N) for j in range(N)]
-
-np.random.seed(0)
-x = np.random.rand(N)*1000
-y = np.random.rand(N)*1000
-
-# si bien acá genero una matriz de distancias completa, dentro de mi algoritmo
-# esto no está asegurado y además quiero las distancias mínimas,
-#  es por eso que igualmente aplico floyd-warshall
-distancia = {(i,j): np.hypot(x[i] - x[j], y[i] - y[j]) for i,j in aristas }
-
-grasp(ciudades, distancia, 0)
+# propósito: retorna un entero que limitará la poca mejora al explorar vecindarios.
+# complejidad: O(1) ya que son cálculos.
+# comentario: tomé esta condición a través de experimentación con BL.
+def limite_bl(n):
+    return int(np.ceil(n * 0.8))

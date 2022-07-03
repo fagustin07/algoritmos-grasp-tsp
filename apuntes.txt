@@ -1,0 +1,7 @@
+ejecutando GRASP, cant de iteraciones para cada instancia:
+
+- 200 ciudades: en 100 ejecuciones de GRASP, no se hicieron más de 152 iteraciones en BL. promedio: 120. 450 segundos.
+- 150 ciudades: en 100 ejecuciones de GRASP, no se hicieron más de 115 iteraciones en BL. promedio: 95. 158 segundos.
+- 100 ciudades: en 100 ejecuciones de GRASP, no se hicieron más de 80 iteraciones en BL. promedio: 60. 57 segundos.
+
+Con estos resultados, la cant máxima de iteraciones por BL podría ser el 80% de N.
