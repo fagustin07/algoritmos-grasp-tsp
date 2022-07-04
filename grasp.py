@@ -19,7 +19,6 @@ def exec(ciudades, distancia, ciudad_origen):
     dicc_ciudades = {ciudad: False for ciudad in ciudades}
     # distancias_completas = floyd_warshall(ciudades, distancia.copy())
     distancias_completas = distancia
-    # limite_iteraciones = calcular_tolerancia(len(ciudades))
     max_iteraciones = limite_grasp(N)
     max_it_bl = limite_bl(N)
     resultados = []
@@ -45,8 +44,6 @@ def exec(ciudades, distancia, ciudad_origen):
         res_iteracion = []
         max_iteraciones -= 1
         
-    print(f"\nmejor resultado encontrado para {len(ciudades)} ciudades: {mejor_resultado[1]}")
-
     return resultados
 
 # propósito: encontrar un camino con un costo relativamente bajo que pase 
