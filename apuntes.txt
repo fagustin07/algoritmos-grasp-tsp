@@ -1,7 +1,21 @@
-ejecutando GRASP, cant de iteraciones para cada instancia:
+Ejecutando GRASP, cant de iteraciones para cada instancia:
 
-- 200 ciudades: en 100 ejecuciones de GRASP, no se hicieron más de 152 iteraciones en BL. promedio: 120. 450 segundos.
-- 150 ciudades: en 100 ejecuciones de GRASP, no se hicieron más de 115 iteraciones en BL. promedio: 95. 158 segundos.
-- 100 ciudades: en 100 ejecuciones de GRASP, no se hicieron más de 80 iteraciones en BL. promedio: 60. 57 segundos.
+- 200 ciudades: en 10 ejecuciones de GRASP, no se hicieron más de 152 iteraciones en BL. Alrededor de 100 iteraciones las curvas se aplanan.
+- 150 ciudades: en 20 ejecuciones de GRASP, no se hicieron más de 115 iteraciones en BL. Alrededor de 75 iteraciones las curvas se aplanan.
+- 100 ciudades: en 20 ejecuciones de GRASP, no se hicieron más de 80 iteraciones en BL. Alrededor de 80 iteraciones las curvas se aplanan.
 
-Con estos resultados, la cant máxima de iteraciones por BL podría ser el 80% de N.
+Con estos resultados, la cant máxima de iteraciones por BL podría ser el 50% de N.
+
+Ejecutando GRASP, cant de iteraciones para cada instancia con los ejemplos dados:
+
+- d198:   en 10 iteraciones de GRASP, en peor caso se llegó al mejor del vecindario en 124 iteraciones de BL. Alrededor de 100 iteraciones las curvas se aplanan.
+- brg180: en 20 iteraciones de GRASP, en peor caso se llegó al mejor del vecindario en 133 iteraciones de BL. Alrededor de 25 iteraciones las curvas se aplanan.
+- ch150:  en 20 iteraciones de GRASP, en peor caso se llegó al mejor del vecindario en 104 iteraciones de BL.  Alrededor de 80 iteraciones las curvas se aplanan.
+- gr137:  en 20 iteraciones de GRASP, en peor caso se llegó al mejor del vecindario en 98 iteraciones de BL.  Alrededor de 70 iteraciones las curvas se aplanan.
+- gr120:  en 20 ejecuciones de GRASP, en peor caso se llegó al mejor del vecindario en 80 iteraciones de BL. Alrededor de 60 iteraciones las curvas se aplanan.
+
+Con estos resultados, la cant máxima de iteraciones por BL podría ser el 50% de N.
+
+
+
+Conclusion: para no desperdiciar tiempo de cómputo, las iteraciones máximas de BL deben ser de la mitad de las ciudades dadas.

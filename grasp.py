@@ -118,7 +118,7 @@ def buscar_vecino(solucion, distancia):
 
             diferencia_costo = costo_y - costo_x
 
-            if diferencia_costo < 0 and diferencia_costo < mejor_cambio_local:
+            if diferencia_costo < mejor_cambio_local:
                 mejor_cambio_local = diferencia_costo
                 mejor_i = i
                 mejor_j = j
@@ -161,7 +161,7 @@ def cantidad_mejores(n):
 # propósito: retorna un entero que limitará la cantidad de iteraciones de grasp.
 # complejidad: O(1) ya que son cálculos.
 # comentario: tomé esta condición que fue mencionada en clase y basándome en las 
-# pruebas que hice con 100 iteraciones de grasp, me parece un numero correcto.
+# pruebas que hice con GRASP.
 def limite_grasp(n):
     return int(np.ceil(np.log2(n)))
 
@@ -169,4 +169,4 @@ def limite_grasp(n):
 # complejidad: O(1) ya que son cálculos.
 # comentario: tomé esta condición a través de experimentación con BL.
 def limite_bl(n):
-    return int(np.ceil(n * 0.8))
+    return int(np.ceil(n * 0.5))
