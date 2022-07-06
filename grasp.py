@@ -7,51 +7,48 @@ import numpy as np
 # ciudades: lista de ciudades
 # distancia: matriz entre ciudades donde distancia[i,j] = distancia desde la ciudad i
 # hasta la ciudad j y distancia[j,i] = distancia[i,j]
-# complejidad: O(N^3) que viene de aplicar floyd-warshall.
-# comentario: Ejecuté una instancia de 1000 ciudades con floyd-warshall y tardó
-# más de 5 min y lo corté porque no terminaba de aplicar el algoritmo. Luego probé
-# correrlo de nuevo pero sin FW y tardó 13s. Es por eso que en la complejidad de BL
-# menciono que para mí la complejidad de BL es más bien O(N^2) y que el while
-# representa un k fijo y no hace que la complejidad llegue a O(N^3) sino
-# más bien O(k * N^2) siendo k < N.
+# complejidad: O(N^4) siendo N la cantidad de ciudades.
 def exec(ciudades, distancia, ciudad_origen):
     N = len(ciudades)
     dicc_ciudades = {ciudad: False for ciudad in ciudades}
-    # distancias_completas = floyd_warshall(ciudades, distancia.copy())
-    distancias_completas = distancia
+    distancias_completas = floyd_warshall(ciudades, distancia.copy()) # O(N^3)
     max_iteraciones = limite_grasp(N)
     max_it_bl = limite_bl(N)
-    resultados = []
+    resultados_grasp = []
+    resultados_bl = []
     res_iteracion = []
+
     if (N < 2):
-        resultados.append([(ciudades, 0)])
-        return resultados
+        resultados_grasp.append([(ciudades, 0)])
+        return resultados_grasp
 
     mejor_resultado = ([], math.inf)
-    while max_iteraciones > 0:
-        # solución greedy
+
+    while max_iteraciones > 0: # O(N)
+        # solución greedy # O(log N * N^2)
         recorrido, costo = heuristica_nearest_neighbor(dicc_ciudades.copy(), distancias_completas, ciudad_origen)
         sol_greedy = (recorrido.copy(), costo)
         print(f"\n[#{max_iteraciones}] puntaje greedy: {costo}")
-        res_iteracion.append(sol_greedy)
-        # solución búsqueda local
+        res_iteracion.append(sol_greedy[1])
+        # solución búsqueda local # O(N^3)
         sol_local = busqueda_local(sol_greedy, distancias_completas, res_iteracion, max_it_bl)
         print(f"[#{max_iteraciones}] puntaje búsqueda local: {sol_local[1]}")
         if sol_local[1] < mejor_resultado[1]:
           mejor_resultado = sol_local
-        resultados.append(res_iteracion)
+        resultados_bl.append(res_iteracion)
+        resultados_grasp.append(mejor_resultado[1])
         print(f"[#{max_iteraciones}] iteraciones en búsqueda local: {len(res_iteracion)-1}")
         res_iteracion = []
         max_iteraciones -= 1
-        
-    return resultados
+    resultados_grasp.append(mejor_resultado[1])
+
+    return (resultados_grasp, resultados_bl, mejor_resultado)
 
 # propósito: encontrar un camino con un costo relativamente bajo que pase 
 # por todas las ciudades.
 # precondición: existen caminos entre todo par de ciudades y las conexiones 
 # entre ciudades valen igual tanto para la ida y la vuelta.
-# complejidad: O(N*N) = O(N^2) siendo N la cantidad de ciudades multiplicado
-# por las posibles ciudades a las que puede ir cada ciudad.
+# complejidad: O(N * N * log N) =  O(log N * N^2) siendo N la cantidad de ciudades.
 def heuristica_nearest_neighbor(ciudades, distancia, ciudad_inicial):
     recorrido = [ciudad_inicial]
     ciudades[ciudad_inicial] = True
@@ -75,10 +72,7 @@ def heuristica_nearest_neighbor(ciudades, distancia, ciudad_inicial):
     
 # propósito: retorna una mejor solucion vecina de la dada si existe, sino retorna la misma solucion.
 # precondición: la distancia es una matriz completa de distancias.
-# complejidad: O(N^3). Siendo N^2 el costo de explorar un vecindario multiplicado
-# por N en el caso que siempre encuentre un vecino con costos mejorados mayores al 10% del anterior.
-# Esto en la teoría, pero la verdad es que al optimizar la BL siento que el costo 
-# es mas bien O(k * N^2) => O(N^2).
+# complejidad: O(N^3). Siendo N la cantidad de ciudades.
 def busqueda_local(solucion, distancia, res_iteraciones, limite_corte):
     mejor_recorrido = solucion[0]
     mejor_costo = solucion[1]
@@ -88,15 +82,17 @@ def busqueda_local(solucion, distancia, res_iteraciones, limite_corte):
         recorrido_vecino, costo_vecino, mejora_vecino = buscar_vecino((mejor_recorrido.copy(), mejor_costo), distancia)
 
         if costo_vecino < mejor_costo:
-            mejora_minima_apreciable = mejor_costo * 0.1
-            if mejora_vecino < mejora_minima_apreciable:
+            mejora_minima_apreciable = mejor_costo * 0.01
+            if limite_corte % 5 == 0 and mejora_vecino < mejora_minima_apreciable:
                 limite_corte -= 1
+            # print("costo actual: {}, costo vecino: {}, mejora minima apreciable: {}, mejora: {}".format(mejor_costo, costo_vecino, mejora_minima_apreciable, mejora_vecino))
             mejor_recorrido = recorrido_vecino
             mejor_costo = costo_vecino
         else:
-            sigo_buscando = mejora_vecino != 0
-
-        res_iteraciones.append((mejor_recorrido, mejor_costo))
+            # cuando se cumpla que costo_vecino == mejor_costo 
+            # significa que el mejor vecino encontrado era mi solución actual, entonces encontré al mejor del vecindario.
+            sigo_buscando = costo_vecino != mejor_costo
+        res_iteraciones.append(mejor_costo)
     return (mejor_recorrido, mejor_costo)
 
 # propósito: explora el vecindario de una solución actual y retorna
@@ -160,10 +156,9 @@ def cantidad_mejores(n):
 
 # propósito: retorna un entero que limitará la cantidad de iteraciones de grasp.
 # complejidad: O(1) ya que son cálculos.
-# comentario: tomé esta condición que fue mencionada en clase y basándome en las 
-# pruebas que hice con GRASP.
+# comentario: tomé esta condición basándome en la experimentación con GRASP.
 def limite_grasp(n):
-    return int(np.ceil(np.log2(n)))
+    return n
 
 # propósito: retorna un entero que limitará la poca mejora al explorar vecindarios.
 # complejidad: O(1) ya que son cálculos.

@@ -1,18 +1,37 @@
 import matplotlib.pyplot as plt
 
-def graficar(archivo, N, resultados, path):
+def graficar(archivo, N, resultados_grasp, resultados_bl, path_bl, path_grasp, guardar = False):
+    plt.figure(1)
     plt.title(f"Resultados de búsqueda local para {archivo} con {N} ciudades")
-    plt.xlabel("cantidad de iteraciones en búsqueda local")
+    plt.xlabel("# iteraciones")
     plt.ylabel("puntaje")
 
-    for i, res in enumerate(resultados):
-        puntajes = [sol[1] for sol in res]
-        plt.plot(list(range(0, len(res))), puntajes, label=f"GRASP {i}")
+    for res in resultados_bl:
+        puntajes = [sol for sol in res]
+        plt.plot(list(range(0, len(res))), puntajes)
 
-    plt.xlim(0, max([len(res) for res in resultados]) + 1)
-    plt.ylim(0, max([sol[1] for res in resultados for sol in res]) + 300)
+    plt.xlim(0, max([len(res) for res in resultados_bl]) + 1)
+    plt.ylim(0, max([sol for res in resultados_bl for sol in res]) + 300)
     plt.legend()
-    plt.savefig(path)
+    if guardar:
+        plt.savefig(path_bl)
+
+    plt.figure(2)
+    plt.title(f"Resultados de GRASP para {archivo} con {N} ciudades")
+    plt.xlabel("# iteraciones")
+    plt.ylabel("puntaje")
+
+    puntajes = []
+    for res in resultados_grasp:
+        puntajes.append(res)
+
+    plt.plot(list(range(0, len(resultados_grasp))), puntajes)
+    plt.xlim(0, len(resultados_grasp) + 10)
+    plt.ylim(0, max(res for res in resultados_grasp) + 300)
+    plt.legend()
+    if guardar:
+        plt.savefig(path_grasp)
+    
     plt.show()
 
 def dibujar(solucion, path):
