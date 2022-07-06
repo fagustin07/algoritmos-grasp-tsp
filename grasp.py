@@ -158,7 +158,7 @@ def cantidad_mejores(n):
 # complejidad: O(1) ya que son cálculos.
 # comentario: tomé esta condición basándome en la experimentación con GRASP.
 def limite_grasp(n):
-    return n
+    return int(np.ceil(n * 0.6))
 
 # propósito: retorna un entero que limitará la poca mejora al explorar vecindarios.
 # complejidad: O(1) ya que son cálculos.
